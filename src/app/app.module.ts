@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { NgIdModule } from './demo/modules/ng-id/ng-id.module';
 import { AppLayoutModule } from './layout/app.layout.module';
 import { NotfoundComponent } from './demo/components/notfound/notfound.component';
 import { ProductService } from './demo/service/product.service';
@@ -18,7 +19,8 @@ import { PhotoService } from './demo/service/photo.service';
     ],
     imports: [
         AppRoutingModule,
-        AppLayoutModule
+        AppLayoutModule,
+        NgIdModule.forRoot()
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
