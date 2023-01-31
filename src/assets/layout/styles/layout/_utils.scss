@@ -18,3 +18,38 @@
         top: 100px;
     }
 }
+
+.p-scrollpanel {
+
+    .p-scrollpanel-content {
+        /**
+         * Hide native scrollbars
+         */
+
+        /* Chrome, Safari and Opera */
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+
+        height: 100%;
+        width: 100%;
+        padding: 0;
+    }
+
+    .p-scrollpanel-bar {
+        background-color: var(--surface-border);
+    }
+
+    .p-scrollpanel-bar-x {
+        transform: translateY(-.25rem);
+        height: .5rem;
+    }
+
+    .p-scrollpanel-bar-y {
+        transform: translateX(-.25rem);
+        width: .5rem;
+    }
+
+}
