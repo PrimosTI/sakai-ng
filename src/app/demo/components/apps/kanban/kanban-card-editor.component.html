@@ -1,0 +1,232 @@
+<p-sidebar styleClass="p-sidebar-md" [(visible)]="visible" position="right" [showCloseIcon]="false" [blockScroll]="true">
+
+    <!-- Header -->
+    <ng-template pTemplate="header">
+        <div class="flex justify-content-between align-items-center gap-2 w-full">
+            <div class="flex flex-column gap-2 flex-grow-1">
+                <h5 class="my-0 text-700">{{card.boardlist?.label}}</h5>
+                <h4 class="my-0">{{card.label}}</h4>
+            </div>
+            <button pButton icon="pi pi-ellipsis-v" class="p-button-secondary p-button-rounded p-button-text p-sidebar-close" (click)="cardPopup.toggle($event)"></button>
+            <button pButton icon="pi pi-times" class="p-button-plain p-button-rounded p-button-text p-sidebar-close"></button>
+        </div>
+        <p-overlayPanel #cardPopup>
+            <ng-template pTemplate>
+                <div class="field">
+                    <ng-id #renameCardId></ng-id>
+                    <label [for]="renameCardId.id">Rename card</label>
+                    <div class="p-inputgroup">
+                        <input #renameCardInput pInputText [id]="renameCardId.id" placeholder="Card label" [ngModel]="card.label"  style="width: 40vw; max-width: 30rem">
+                        <button pButton icon="pi pi-pencil" (click)="card.label = renameCardInput.value; cardPopup.hide()" [disabled]="!renameCardInput.value.trim()"></button>
+                    </div>
+                </div>
+                <hr/>
+                <div class="field">
+                    <label>Move to...</label>
+                    <p-listbox #moveCardList [ngModel]="card.boardlist" [options]="boardlists" [filter]="false" dataKey="id" optionLabel="label"></p-listbox>
+                </div>
+                <div class="text-right">
+                    <button pButton icon="pi pi-check"
+                        [disabled]="!moveCardList.value || moveCardList.value.id === card.boardlist?.id"
+                        (click)="card.boardlist = moveCardList.value; cardPopup.hide()"
+                    ></button>
+                </div>
+            </ng-template>
+        </p-overlayPanel>
+    </ng-template>
+
+    <!-- Content -->
+    <ng-template pTemplate="content">
+        <p-tabMenu #tabMenu styleClass="mb-3" [model]="tabsMenu" [activeItem]="tabsMenu[0]"></p-tabMenu>
+
+        <!-- Details tab -->
+        <div *ngIf="tabMenu.activeItem.id === 'details'" class="p-fluid">
+            <!-- Card info -->
+            <div class="field">
+                <ng-id #descriptionId></ng-id>
+                <label [for]="descriptionId.id">Description</label>
+                <textarea pInputTextarea [id]="descriptionId.id" rows="4" [(ngModel)]="card.description" style="resize: none;"></textarea>
+            </div>
+
+            <div class="p-formgrid grid">
+                <div class="field col">
+                    <ng-id #startDateId></ng-id>
+                    <label [for]="startDateId.id">Start Date</label>
+                    <p-calendar [inputId]="startDateId.id" dateFormat="yy-mm-dd" [(ngModel)]="card.startDate" appendTo="body"></p-calendar>
+                </div>
+                <div class="field col">
+                    <ng-id #endDateId></ng-id>
+                    <label [for]="endDateId.id">Due Date</label>
+                    <p-calendar [inputId]="endDateId.id" dateFormat="yy-mm-dd" [(ngModel)]="card.dueDate" appendTo="body"></p-calendar>
+                </div>
+            </div>
+
+            <!-- Assignees -->
+            <div class="field">
+                <ng-id #assigneesId></ng-id>
+                <label [for]="assigneesId.id">Assignees</label>
+                <p-autoComplete [inputId]="assigneesId.id" [(ngModel)]="card.assignees" [suggestions]="filteredAssignees" (completeMethod)="onSearchAssignee($event)" field="name" [multiple]="true">
+                    <ng-template let-person pTemplate="item">
+                        <div class="flex align-items-center border-round">
+                            <p-avatar class="mr-2" shape="circle" [image]="person.avatar"></p-avatar>
+                            <span class="text-900">{{person.name}}</span>
+                        </div>
+                    </ng-template>
+                    <ng-template let-person pTemplate="selectedItem">
+                        <div class="flex align-items-center border-round">
+                            <p-avatar class="mr-2" shape="circle" [image]="person.avatar"></p-avatar>
+                            <span class="text-900">{{person.name}}</span>
+                        </div>
+                    </ng-template>
+                </p-autoComplete>
+            </div>
+
+            <!-- Tasklists -->
+            <h5 class="flex align-items-center justify-content-between">
+                <span class="flex-grow-1">Tasks</span>
+                <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-secondary"
+                    (click)="tasklistsPopup.toggle($event)"
+                ></button>
+                <p-overlayPanel #tasklistsPopup>
+                    <ng-template pTemplate>
+                        <div class="field">
+                            <ng-id #newTasklistLabelId></ng-id>
+                            <label [for]="newTasklistLabelId.id">Create new tasklist</label>
+                            <div class="p-inputgroup">
+                                <input #newTasklistInput pInputText [id]="newTasklistLabelId.id" placeholder="Add a tasklist...">
+                                <button pButton icon="pi pi-plus" (click)="createTasklist(newTasklistInput.value.trim()); newTasklistInput.value = ''; tasklistsPopup.hide()" [disabled]="!newTasklistInput.value.trim()"></button>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-overlayPanel>
+            </h5>
+
+            <!-- Progressbar -->
+            <div *ngIf="card.tasklists.length" class="field">
+                <label>Progress</label>
+                <p-progressBar [value]="computePercentTasks(card.tasklists)" [showValue]="false"></p-progressBar>
+            </div>
+
+            <div *ngFor="let tasklist of card.tasklists" class="field border-1 surface-border border-round">
+                <!-- Tasklist header -->
+                <div class="flex align-items-center justify-content-between m-3">
+                    <h6 class="flex-grow-1 my-0">{{tasklist.label}}</h6>
+                    <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-sm p-button-secondary"
+                        (click)="tasklistPopup.toggle($event)"
+                    ></button>
+
+                    <!-- Tasklist popup -->
+                    <p-overlayPanel #tasklistPopup>
+                        <ng-template pTemplate>
+                            <div class="field">
+                                <ng-id #renameTasklistId></ng-id>
+                                <label [for]="renameTasklistId.id">Rename tasklist</label>
+                                <div class="p-inputgroup">
+                                    <input #renameTasklistInput pInputText [id]="renameTasklistId.id" placeholder="Tasklist name" [ngModel]="tasklist.label">
+                                    <button pButton icon="pi pi-pencil" (click)="tasklist.label = renameTasklistInput.value" [disabled]="!renameTasklistInput.value.trim()"></button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <ng-id #taskLabelId></ng-id>
+                                <label [for]="taskLabelId.id">Create new task</label>
+                                <div class="p-inputgroup">
+                                    <input #newTaskInput pInputText [id]="taskLabelId.id" placeholder="Add a task...">
+                                    <button pButton icon="pi pi-plus" (click)="createTask(tasklist, newTaskInput.value.trim()); newTaskInput.value = ''" [disabled]="!newTaskInput.value.trim()"></button>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </p-overlayPanel>
+                </div>
+
+                <!-- Tasks -->
+                <ul class="list-none flex flex-column gap-3 m-3 p-0">
+                    <li *ngFor="let task of tasklist.tasks" class="flex align-items-start gap-3">
+                        <p-checkbox
+                            [label]="task.description"
+                            [(ngModel)]="task.done"
+                            [binary]="true"
+                            [labelStyleClass]="task.done ? 'line-through' : ''"
+                        >
+                        </p-checkbox>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Comments -->
+            <ng-id #commentsId></ng-id>
+            <h5><label [for]="commentsId.id">Comments</label></h5>
+            <div class="flex flex-column row-gap-4 mb-4">
+                <!-- Comments list -->
+                <div *ngFor="let comment of card.comments" class="flex align-items-start border-round">
+                    <p-avatar *ngIf="comment.author.avatar" size="large" shape="circle" [image]="comment.author.avatar!"></p-avatar>
+                    <p-avatar *ngIf="!comment.author.avatar" size="large" shape="circle" icon="pi pi-user"></p-avatar>
+                    <div class="ml-3 w-full">
+                        <div class="border-1 surface-ground surface-border p-2 border-round">
+                            <div class="flex justify-content-between mb-2">
+                                <span class="block font-semibold text-800">{{comment.author.name}}</span>
+                                <span class="block text-700">{{comment.date | date: 'd MMM HH:mm'}}</span>
+                            </div>
+                            <span style="white-space: pre-wrap;">{{comment.content}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Comment input -->
+            <div class="flex align-items-start border-round">
+                <p-avatar class="mb-4" size="large" shape="circle" icon="pi pi-user"></p-avatar>
+                <textarea #commentField pInputTextarea
+                    placeholder="Write a comment..."
+                    class="flex-grow-1 mx-3"
+                    [id]="commentsId.id"
+                    rows="2"
+                    [autoResize]="true"
+                    [(ngModel)]="commentValue"
+                    (keyup.control.enter)="sendComment(commentValue.trim()); commentValue = ''"
+                ></textarea>
+                <button pButton icon="pi pi-send"
+                    class="p-button-primary p-button-rounded p-button-outlined flex-shrink-0 align-self-center"
+                    [disabled]="!commentValue.trim()"
+                    (click)="sendComment(commentValue.trim()); commentValue = ''"
+                ></button>
+            </div>
+        </div>
+
+        <!-- Attachments tab -->
+        <div *ngIf="tabMenu.activeItem.id === 'attachments'" >
+            <p-table [value]="card.attachments">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Size</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td>{{item.name}}</td>
+                        <td>{{item.date | date: 'yyyy-MM-dd'}}</td>
+                        <td>{{item.size | fileSize }}</td>
+                        <td></td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </ng-template>
+
+    <!-- Footer -->
+    <ng-template pTemplate="footer">
+        <div class="flex w-full border-top-1 surface-border py-5 gap-3">
+            <button
+                pButton label="Remove card" icon="pi pi-trash"
+                class="p-button-danger p-button-text"
+                (click)="onRemoveCard($event)"
+            ></button>
+            <span class="flex-grow-1"></span>
+            <button pButton label="Cancel" icon="pi pi-times" class="p-button-text p-button-plain" (click)="hide()"></button>
+            <button pButton label="Save" icon="pi pi-check" class="p-button-text" (click)="onSave(); hide()"></button>
+        </div>
+    </ng-template>
+
+    <p-confirmPopup [key]="uniqueIdPrefix"></p-confirmPopup>
+</p-sidebar>

@@ -1,0 +1,24 @@
+<!-- Board -->
+<div class="relative h-full w-full">
+    <div class="flex gap-5 absolute top-0 right-0 bottom-0 left-0 pb-2 mb-2 overflow-auto __scroll_panel">
+        <app-KanbanBoardlist *ngFor="let boardlist of boardlists"
+            [boardlist]="boardlist"
+            [dropListId]="uniqueIdPrefix + '-' + boardlist.id"
+            [dropListConnectedTo]="dropListsIds"
+            (newCard)="onNewCard(boardlist)"
+            (selectCard)="onSelectCard($event)"
+            (removeCard)="onRemoveCard($event)"
+            (removeList)="onRemoveBoardlist(boardlist)"
+        ></app-KanbanBoardlist>
+    </div>
+</div>
+
+<!-- Card editor -->
+<app-KanbanCardEditor #editor
+    [boardlists]="boardlists"
+    (saveCard)="onSaveCard($event)"
+    (removeCard)="removeCard($event)"
+></app-KanbanCardEditor>
+
+<!-- Dialogs -->
+<p-confirmDialog [key]="uniqueIdPrefix" header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>

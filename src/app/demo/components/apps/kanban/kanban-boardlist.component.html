@@ -1,0 +1,56 @@
+<div class="flex flex-column justify-content-stretch h-full md:w-25rem surface-card border-1 surface-border border-round">
+
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center mx-4 my-4">
+        <span class="text-900 font-semibold text-lg">{{boardlist.label}}</span>
+        <button pButton class="p-button-rounded p-button-text p-button-secondary"
+            icon="pi pi-ellipsis-h"
+            (click)="listPopup.toggle($event)">
+        </button>
+    </div>
+    <p-overlayPanel #listPopup>
+        <ng-template pTemplate>
+            <div class="field">
+                <ng-id #renameListId></ng-id>
+                <label [for]="renameListId.id">Rename list</label>
+                <div class="p-inputgroup">
+                    <input #renameListInput pInputText [id]="renameListId.id" placeholder="List label" [ngModel]="boardlist.label">
+                    <button pButton icon="pi pi-pencil" (click)="boardlist.label = renameListInput.value; listPopup.hide()" [disabled]="!renameListInput.value.trim()"></button>
+                </div>
+            </div>
+            <hr/>
+            <button
+                label="Remove list" icon="pi pi-trash"
+                pButton class="p-button p-button-text p-button-danger"
+                (click)="listPopup.hide(); removeList.emit()"
+            ></button>
+            <button
+                label="New card" icon="pi pi-check-square"
+                pButton class="p-button p-button-text"
+                (click)="newCard.emit()"
+            ></button>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- Cards -->
+    <div class="flex-shrink-1 flex-grow-1 pb-4  overflow-y-auto">
+        <p-scrollPanel [style]="{ width: '100%', height: '100%' }">
+            <div cdkDropList
+                class="flex flex-column gap-3 px-4 min-h-full"
+                [id]="dropListId"
+                [cdkDropListData]="boardlist"
+                [cdkDropListConnectedTo]="dropListConnectedTo"
+                (cdkDropListDropped)="onDropCard($event)"
+            >
+                <div *ngIf="!boardlist.cards.length" class="__kanban-list-empty-label flex flex-grow-1 align-items-center justify-content-center font-italic">Empty list</div>
+                <app-KanbanBoardlistCard *ngFor="let card of boardlist.cards"
+                    cdkDrag [cdkDragData]="card"
+                    [card]="card"
+                    (click)="onCardClick($event, card)"
+                    (removeCard)="removeCard.emit(card)"
+                ></app-KanbanBoardlistCard>
+            </div>
+        </p-scrollPanel>
+    </div>
+
+</div>

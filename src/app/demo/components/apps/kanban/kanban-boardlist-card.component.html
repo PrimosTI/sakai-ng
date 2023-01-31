@@ -1,0 +1,60 @@
+<div class="__kanban-card-content flex flex-column surface-card w-full border-1 surface-border p-3 gap-3 hover:surface-ground cursor-pointer border-round">
+
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center">
+        <span class="text-900 font-semibold">{{card.label}}</span>
+
+        <button pButton class="p-button-rounded p-button-text p-button-sm p-button-secondary flex-shrink-0"
+            icon="pi pi-ellipsis-v"
+            (click)="cardPopup.toggle($event);"
+        ></button>
+    </div>
+    <p-overlayPanel #cardPopup>
+        <ng-template pTemplate>
+            <button
+                label="Remove card" icon="pi pi-trash"
+                pButton class="p-button p-button-text p-button-danger"
+                (click)="cardPopup.hide(); removeCard.emit()"
+            ></button>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- Description -->
+    <div class="text-700 __break-word">
+        {{card.description}}
+    </div>
+
+    <!-- Progress -->
+    <p-progressBar *ngIf="card.tasklists.length" [value]="computePercentTasks(card.tasklists)" [showValue]="false"></p-progressBar>
+
+    <!-- Footer -->
+    <div class="flex align-items-center justify-content-between flex-column md:flex-row gap-4 md:gap-0">
+        <!-- Assigness -->
+        <p-avatarGroup>
+            <ng-template ngFor let-person [ngForOf]="card.assignees" let-i="index">
+                <p-avatar *ngIf="i < 3" shape="circle" [image]="person.avatar ?? ''"></p-avatar>
+            </ng-template>
+            <p-avatar *ngIf="card.assignees.length === 4" shape="circle" [image]="card.assignees[3].avatar ?? ''"></p-avatar>
+            <p-avatar *ngIf="card.assignees.length > 4" shape="circle" [label]="'+' + (card.assignees.length - 3)"></p-avatar>
+        </p-avatarGroup>
+
+        <div class="flex align-items-center gap-3">
+            <!-- Tasks -->
+            <span *ngIf="card.tasklists.length" class="text-900 font-semibold">
+                <i class="pi pi-check-square text-700 mr-2"></i>{{computeCompletedTasks(card.tasklists)}} / {{computeTotalTasks(card.tasklists)}}
+            </span>
+            <!-- Attachments -->
+            <span *ngIf="card.attachments.length" class="text-900 font-semibold">
+                <i class="pi pi-paperclip text-700 mr-2"></i>{{card.attachments.length}}
+            </span>
+            <!-- Date -->
+            <span *ngIf="card.dueDate" class="text-900 font-semibold">
+                <i class="pi pi-clock text-700 mr-2"></i>{{card.dueDate | date: 'MMM d'}}
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Drop placeholder -->
+<div class="__kanban-card-placeholder border-round bg-primary p-1 opacity-80"></div>

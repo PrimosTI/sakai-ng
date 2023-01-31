@@ -1,0 +1,8 @@
+:host .p-button.justify-content-center ::ng-deep .p-button-label {
+    flex: 0;
+    white-space: nowrap;
+}
+
+.cdk-drop-list-dragging .__kanban-list-empty-label {
+    display: none !important;
+}

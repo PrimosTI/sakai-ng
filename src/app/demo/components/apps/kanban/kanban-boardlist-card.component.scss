@@ -1,0 +1,28 @@
+:host .p-button.justify-content-center ::ng-deep .p-button-label {
+    flex: 0;
+    white-space: nowrap;
+}
+
+:host:not(.cdk-drag-placeholder) {
+    .__kanban-card-placeholder {
+        display: none !important;
+    }
+}
+
+:host.cdk-drag-placeholder {
+    .__kanban-card-content {
+        display: none !important;
+    }
+}
+
+:host.cdk-drag-preview .__kanban-card-content {
+    opacity: .8;
+}
+
+p-progressBar ::ng-deep .p-progressbar {
+    height: .3rem;
+}
+
+.__break-word {
+    word-break: break-word;
+}
