@@ -8,5 +8,12 @@
 }
 
 .layout-main {
+    display: flex;
     flex: 1 1 auto;
+
+
+    > router-outlet + ng-component {
+        display: block;
+        flex: 1 1 auto;
+    }
 }
