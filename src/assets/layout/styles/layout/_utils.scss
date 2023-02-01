@@ -52,4 +52,17 @@
         width: .5rem;
     }
 
+    /**
+     * fix: nested scroll-bar visible on hover ScrollPanel
+     */
+    &:hover, &:active {
+        .p-scrollpanel-bar {
+            opacity: 0 !important;
+        }
+
+        > .p-scrollpanel-bar {
+            opacity: 1 !important;
+        }
+    }
+
 }

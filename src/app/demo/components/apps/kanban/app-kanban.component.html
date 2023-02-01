@@ -1,15 +1,22 @@
 <!-- Board -->
-<div class="relative h-full w-full">
-    <div class="flex gap-5 absolute top-0 right-0 bottom-0 left-0 pb-2 mb-2 overflow-auto __scroll_panel">
-        <app-KanbanBoardlist *ngFor="let boardlist of boardlists"
-            [boardlist]="boardlist"
-            [dropListId]="uniqueIdPrefix + '-' + boardlist.id"
-            [dropListConnectedTo]="dropListsIds"
-            (newCard)="onNewCard(boardlist)"
-            (selectCard)="onSelectCard($event)"
-            (removeCard)="onRemoveCard($event)"
-            (removeList)="onRemoveBoardlist(boardlist)"
-        ></app-KanbanBoardlist>
+<div class="flex h-full pb-5">
+    <div class="card flex flex-column flex-grow-1">
+        <h5>Kanban</h5>
+        <div class="flex-grow-1 px-3 surface-ground surface-border border-1 border-round">
+            <p-scrollPanel [style]="{ width: '100%', height: '100%' }">
+                <div class="flex gap-5 py-3 absolute h-full">
+                    <app-KanbanBoardlist *ngFor="let boardlist of boardlists"
+                        [boardlist]="boardlist"
+                        [dropListId]="uniqueIdPrefix + '-' + boardlist.id"
+                        [dropListConnectedTo]="dropListsIds"
+                        (newCard)="onNewCard(boardlist)"
+                        (selectCard)="onSelectCard($event)"
+                        (removeCard)="onRemoveCard($event)"
+                        (removeList)="onRemoveBoardlist(boardlist)"
+                    ></app-KanbanBoardlist>
+                </div>
+            </p-scrollPanel>
+        </div>
     </div>
 </div>
 
